@@ -19,6 +19,18 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.USER);
         return userRepository.save(user);
     }
+
+    @Override
+    public User login(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        return user;
+    }
 }
 
 
