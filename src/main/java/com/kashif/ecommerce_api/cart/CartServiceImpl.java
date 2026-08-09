@@ -1,11 +1,16 @@
 package com.kashif.ecommerce_api.cart;
 
+import com.kashif.ecommerce_api.cart.dto.CartItemResponse;
+import com.kashif.ecommerce_api.cart.dto.CartResponse;
 import com.kashif.ecommerce_api.exception.ResourceNotFoundException;
 import com.kashif.ecommerce_api.product.Product;
 import com.kashif.ecommerce_api.product.ProductRepository;
 import com.kashif.ecommerce_api.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,18 +20,24 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
 
     @Override
-    public Cart getCartByUser(User user) {
-        return cartRepository.findByUserId(user.getId())
+    public CartResponse getCartByUser(User user) {
+        Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
                     newCart.setUser(user);
                     return cartRepository.save(newCart);
                 });
+        return mapToCartResponse(cart);
     }
 
     @Override
-    public Cart addItemToCart(User user, Long productId, Integer quantity) {
-        Cart cart = getCartByUser(user);
+    public CartResponse addItemToCart(User user, Long productId, Integer quantity) {
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    return cartRepository.save(newCart);
+                });
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -34,7 +45,7 @@ public class CartServiceImpl implements CartService {
         for (CartItem item : cart.getItems()) {
             if (item.getProduct().getId().equals(productId)) {
                 item.setQuantity(item.getQuantity() + quantity);
-                return cartRepository.save(cart);
+                return mapToCartResponse(cartRepository.save(cart));
             }
         }
 
@@ -44,17 +55,22 @@ public class CartServiceImpl implements CartService {
         newItem.setQuantity(quantity);
         cart.getItems().add(newItem);
 
-        return cartRepository.save(cart);
+        return mapToCartResponse(cartRepository.save(cart));
     }
 
     @Override
-    public Cart updateItemQuantity(User user, Long productId, Integer quantity) {
-        Cart cart = getCartByUser(user);
+    public CartResponse updateItemQuantity(User user, Long productId, Integer quantity) {
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    return cartRepository.save(newCart);
+                });
 
         for (CartItem item : cart.getItems()) {
             if (item.getProduct().getId().equals(productId)) {
                 item.setQuantity(quantity);
-                return cartRepository.save(cart);
+                return mapToCartResponse(cartRepository.save(cart));
             }
         }
 
@@ -62,9 +78,34 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Cart removeItemFromCart(User user, Long productId) {
-        Cart cart = getCartByUser(user);
+    public CartResponse removeItemFromCart(User user, Long productId) {
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    return cartRepository.save(newCart);
+                });
+
         cart.getItems().removeIf(item -> item.getProduct().getId().equals(productId));
-        return cartRepository.save(cart);
+
+        return mapToCartResponse(cartRepository.save(cart));
+    }
+
+    private CartResponse mapToCartResponse(Cart cart) {
+        List<CartItemResponse> itemResponses = cart.getItems().stream()
+                .map(item -> new CartItemResponse(
+                        item.getProduct().getId(),
+                        item.getProduct().getName(),
+                        item.getProduct().getPrice(),
+                        item.getQuantity(),
+                        item.getProduct().getPrice() * item.getQuantity()
+                ))
+                .collect(Collectors.toList());
+
+        Double totalAmount = itemResponses.stream()
+                .mapToDouble(CartItemResponse::getSubtotal)
+                .sum();
+
+        return new CartResponse(cart.getId(), itemResponses, totalAmount);
     }
 }

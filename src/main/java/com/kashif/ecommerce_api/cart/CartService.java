@@ -1,10 +1,11 @@
 package com.kashif.ecommerce_api.cart;
 
+import com.kashif.ecommerce_api.cart.dto.CartResponse;
 import com.kashif.ecommerce_api.user.User;
 
 public interface CartService {
-    Cart getCartByUser(User user);
-    Cart addItemToCart(User user, Long productId, Integer quantity);
-    Cart updateItemQuantity(User user, Long productId, Integer quantity);
-    Cart removeItemFromCart(User user, Long productId);
+    CartResponse getCartByUser(User user);
+    CartResponse addItemToCart(User user, Long productId, Integer quantity);
+    CartResponse updateItemQuantity(User user, Long productId, Integer quantity);
+    CartResponse removeItemFromCart(User user, Long productId);
 }
