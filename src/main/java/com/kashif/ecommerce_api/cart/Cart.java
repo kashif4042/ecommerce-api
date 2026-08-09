@@ -1,5 +1,6 @@
 package com.kashif.ecommerce_api.cart;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kashif.ecommerce_api.user.User;
 import jakarta.persistence.*;
 import lombok.*;

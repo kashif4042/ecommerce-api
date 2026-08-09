@@ -1,5 +1,6 @@
 package com.kashif.ecommerce_api.cart;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kashif.ecommerce_api.product.Product;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,6 +18,7 @@ public class CartItem {
 
     @JoinColumn(name = "cart_id")
     @ManyToOne
+    @JsonIgnore
     private Cart cart;
 
     @JoinColumn(name = "product_id")
