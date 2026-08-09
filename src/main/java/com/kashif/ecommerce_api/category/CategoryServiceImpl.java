@@ -1,5 +1,6 @@
 package com.kashif.ecommerce_api.category;
 
+import com.kashif.ecommerce_api.exception.ResourceNotFoundException;
 import lombok.*;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +25,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategoryById(Long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
     }
 
     @Override
     public Category updateCategory(Long id, Category category) {
         Category existing = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         existing.setName(category.getName());
         existing.setDescription(category.getDescription());
@@ -41,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new RuntimeException("Category not found");
+            throw new ResourceNotFoundException("Category not found");
         }
         categoryRepository.deleteById(id);
     }

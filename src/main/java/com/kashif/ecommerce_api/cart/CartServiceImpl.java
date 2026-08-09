@@ -1,5 +1,6 @@
 package com.kashif.ecommerce_api.cart;
 
+import com.kashif.ecommerce_api.exception.ResourceNotFoundException;
 import com.kashif.ecommerce_api.product.Product;
 import com.kashif.ecommerce_api.product.ProductRepository;
 import com.kashif.ecommerce_api.user.User;
@@ -28,7 +29,7 @@ public class CartServiceImpl implements CartService {
         Cart cart = getCartByUser(user);
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         for (CartItem item : cart.getItems()) {
             if (item.getProduct().getId().equals(productId)) {
@@ -57,7 +58,7 @@ public class CartServiceImpl implements CartService {
             }
         }
 
-        throw new RuntimeException("Item not found in cart");
+        throw new ResourceNotFoundException("Item not found in cart");
     }
 
     @Override

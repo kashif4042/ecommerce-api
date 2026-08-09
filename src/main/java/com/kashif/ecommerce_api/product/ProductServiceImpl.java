@@ -2,8 +2,10 @@ package com.kashif.ecommerce_api.product;
 
 import com.kashif.ecommerce_api.category.Category;
 import com.kashif.ecommerce_api.category.CategoryRepository;
+import com.kashif.ecommerce_api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
     }
 
     @Override
@@ -41,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product updateProduct(Long id, Product product) {
         Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         existing.setName(product.getName());
         existing.setDescription(product.getDescription());
@@ -50,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
 
         if (product.getCategory() != null) {
             Category category = categoryRepository.findById(product.getCategory().getId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
             existing.setCategory(category);
         }
 
@@ -60,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
-            throw new RuntimeException("Product not found");
+            throw new ResourceNotFoundException("Product not found");
         }
         productRepository.deleteById(id);
     }
